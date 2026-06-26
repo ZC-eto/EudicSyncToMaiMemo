@@ -27,6 +27,7 @@ jobs:
           MaiMemo__Provider: OpenApi
           MaiMemo__Token: ${{ secrets.MAIMEMO_TOKEN }}
           MaiMemo__DefaultNotepadId: ${{ secrets.MAIMEMO_NOTEPAD_ID }}
+          MaiMemo__DefaultNotepadTitle: ${{ secrets.MAIMEMO_NOTEPAD_TITLE }}
           Notification__Enabled: ${{ secrets.NOTIFICATION_ENABLED }}
           Notification__Url: ${{ secrets.NOTIFICATION_URL }}
           Notification__RequestBody: ${{ secrets.NOTIFICATION_REQUEST_BODY }}
