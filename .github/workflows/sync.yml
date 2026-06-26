@@ -19,16 +19,16 @@ jobs:
           dotnet-version: '10.0.x'
           dotnet-quality: 'ga'
 
-      - name: Debug - Test MaiMemo API
+      - name: Resolve Notepad ID
+        id: resolve
         run: |
-          echo "=== Testing MaiMemo API ==="
           RESPONSE=$(curl -s -w '\n%{http_code}' -H "Authorization: Bearer ${{ secrets.MAIMEMO_TOKEN }}" "https://open.maimemo.com/open/api/v1/notepads?limit=5&offset=0")
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
           BODY=$(echo "$RESPONSE" | head -n -1)
           echo "HTTP Status: $HTTP_CODE"
-          echo "Response: $BODY"
-        env:
-          MAIMEMO_TOKEN: ${{ secrets.MAIMEMO_TOKEN }}
+          NOTEPAD_ID=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['data']['notepads'][0]['id'])")
+          echo "Resolved Notepad ID: $NOTEPAD_ID"
+          echo "notepad_id=$NOTEPAD_ID" >> $GITHUB_OUTPUT
 
       - name: Run Sync
         run: dotnet run --project src/EudicSyncToMaiMemo/EudicSyncToMaiMemo.csproj --configuration Release -- --sync-once
@@ -37,8 +37,7 @@ jobs:
           Eudic__DefaultBookId: ${{ secrets.EUDIC_BOOK_ID }}
           MaiMemo__Provider: OpenApi
           MaiMemo__Token: ${{ secrets.MAIMEMO_TOKEN }}
-          MaiMemo__DefaultNotepadId: ${{ secrets.MAIMEMO_NOTEPAD_ID }}
-          MaiMemo__DefaultNotepadTitle: ${{ secrets.MAIMEMO_NOTEPAD_TITLE }}
+          MaiMemo__DefaultNotepadId: ${{ steps.resolve.outputs.notepad_id }}
           Notification__Enabled: ${{ secrets.NOTIFICATION_ENABLED }}
           Notification__Url: ${{ secrets.NOTIFICATION_URL }}
           Notification__RequestBody: ${{ secrets.NOTIFICATION_REQUEST_BODY }}
